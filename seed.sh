@@ -831,7 +831,7 @@ addVirtualBox()
 	groupadd vboxsf		        2>&1 | tee -a $LogFile	
 
 	addCoreAccounts
-	for acct in xt57 di07zd4 iansblues kim
+	for acct in xt57 ag20253 iansblues kim
 		do
         usermod -a -G vboxusers $acct	2>&1	| tee -a	$LogFile
         usermod -a -G vboxsf    $acct	2>&1	| tee -a	$LogFile
