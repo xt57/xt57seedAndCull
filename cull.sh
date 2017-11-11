@@ -177,23 +177,33 @@ truncateThisFile()
 	return 0    
 }
 
-
-
-
 cleanupAptEnv()
 {
-	allowForDebugging
+    allowForDebugging
+
+    if pkgIsInstalled aptitude > /dev/null 2>&1; then
+
+	# remove all of the orphaned pkgs
+    	for x in 1 2 3
+        	do
+        	#   apt-get -y remove $(deborphan)      > /dev/null 2>&1
+	
+        	options="Aptitude::Delete-Unused=1"
+        	echo "aa" | aptitude -y -o$options remove $(deborphan) 2>&1 | tee -a $logFile
+	
+        	sleep 1
+        	done
+    	#for-end
+    fi
 
     #   apt-get -y autoremove
-    apt-get -y clean   
-    apt-get -y autoclean 
+    #	apt-get -y remove --purge $(deborphan)
+
+	apt-get -y clean   
+	apt-get -y autoclean 
     
 	return 0    
 }
-
-
-
-
 
 preOpCleanAndShrink()
 {
@@ -204,15 +214,6 @@ preOpCleanAndShrink()
     post "preCleanAndShrink() function is active ..."
 
     post "initial free space = [ `usedRootBytes` ]"
-
-    # remove all of the orphaned pkgs
-    for x in 1 
-        do
-        #   apt-get -y remove $(deborphan)      > /dev/null 2>&1
-       
-        sleep 1
-        done
-    #for-end
 
     cleanupAptEnv    
  
@@ -252,23 +253,9 @@ postOpCleanAndShrink()
 
     post "initial free space = [ `usedRootBytes` ]"
 
-
-
-    # remove all of the orphaned pkgs
-    for x in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-        do
-        #   apt-get -y remove $(deborphan)      > /dev/null 2>&1
-        
-        options="Aptitude::Delete-Unused=1"
-        echo "aa" | aptitude -y -o$options remove $(deborphan) 2>&1 | tee -a $logFile       
-                
-        sleep 1
-        done
-    #for-end
-
+    cleanupAptEnv          
 
     aptitude -y update 2>&1 | tee -a $logFile    
-
 
     cleanupAptEnv    
  
@@ -428,7 +415,7 @@ removePkgAndReport()
     post "processing each record of the definition file"
     
     
-    for type in     "+"     "p"     "-"     "z"
+    for type in    "!"  "-"  "+"  "z"  "p"
         do
         
         post; post "processing [ $type ] records"; post
@@ -443,7 +430,7 @@ removePkgAndReport()
             recNum=`expr $recNum + 1` 
         
             rec="`head -$recNum $cullDefFile 2> /dev/null | tail -1`"
-        
+     
             action=`echo "$rec"   | cut -f1 -d':'`    
             pkg=`echo "$rec"      | cut -f2 -d':'`
 
@@ -452,16 +439,21 @@ removePkgAndReport()
                 continue
             fi
         
+            post "\ncurrent free space = [ `usedRootBytes` ]\n"   
+        
             post "processing [ $rec ]"
             
             case "${action}" in
+                ^)  installPkgAndReport     $pkg;;
+                !)  installPkgAndReport     $pkg;;
                 +)  installPkgAndReport     $pkg;;
                 z)  installPkgAndReport     $pkg;;                
                 p)  printPkgInfoAndReport   $pkg;;
-                -)  removePkgAndReport      $pkg;;
                 *)  ;;
             esac
 
+            cleanupAptEnv          
+        
             done
         #while-end
         
