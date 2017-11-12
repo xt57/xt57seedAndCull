@@ -14,6 +14,7 @@ logFile="/tmp/cull.log"
 cullDefFile="./cull-lubuntu.cfg"
 cullDefFile="./cull-mint-xfce.cfg"
 cullDefFile="./cull-mint-kde.cfg"
+cullDefFile="./cull-neon.cfg"
 bWeAreDebugging=yes
 
 
@@ -228,7 +229,7 @@ postOpCleanAndShrink()
 
     cleanupAptEnv          
 
-    aptitude -y update 2>&1 | tee -a $logFile    
+    #	aptitude -y update 2>&1 | tee -a $logFile    
 
     cleanupAptEnv    
  
