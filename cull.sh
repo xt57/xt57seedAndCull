@@ -13,6 +13,7 @@
 logFile="/tmp/cull.log"
 cullDefFile="./cull-lubuntu.cfg"
 cullDefFile="./cull-mint-xfce.cfg"
+cullDefFile="./cull-mint-kde.cfg"
 bWeAreDebugging=yes
 
 
@@ -444,10 +445,9 @@ removePkgAndReport()
             post "processing [ $rec ]"
             
             case "${action}" in
-                ^)  installPkgAndReport     $pkg;;
                 !)  installPkgAndReport     $pkg;;
                 +)  installPkgAndReport     $pkg;;
-                z)  installPkgAndReport     $pkg;;                
+                -)  removePkgAndReport      $pkg;;                
                 p)  printPkgInfoAndReport   $pkg;;
                 *)  ;;
             esac
