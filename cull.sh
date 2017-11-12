@@ -178,34 +178,6 @@ truncateThisFile()
 	return 0    
 }
 
-cleanupAptEnv()
-{
-    allowForDebugging
-
-    if pkgIsInstalled aptitude > /dev/null 2>&1; then
-
-	# remove all of the orphaned pkgs
-    	for x in 1 2 3
-        	do
-        	#   apt-get -y remove $(deborphan)      > /dev/null 2>&1
-	
-        	options="Aptitude::Delete-Unused=1"
-        	echo "aa" | aptitude -y -o$options remove $(deborphan) 2>&1 | tee -a $logFile
-	
-        	sleep 1
-        	done
-    	#for-end
-    fi
-
-    #   apt-get -y autoremove
-    #	apt-get -y remove --purge $(deborphan)
-
-	apt-get -y clean   
-	apt-get -y autoclean 
-    
-	return 0    
-}
-
 preOpCleanAndShrink()
 {
 	allowForDebugging
@@ -360,6 +332,34 @@ removePkgAndReport()
 
 
 
+cleanupAptEnv()
+{
+    allowForDebugging
+
+    if pkgIsInstalled aptitude > /dev/null 2>&1; then
+
+	# remove all of the orphaned pkgs
+    	for x in 1
+        	do
+        	#   apt-get -y remove $(deborphan)      > /dev/null 2>&1
+	
+        	options="Aptitude::Delete-Unused=1"
+        	echo "aa" | aptitude -y -o$options remove $(deborphan) 2>&1 | tee -a $logFile
+            apt-get -y remove --purge $(deborphan)
+        	sleep 1
+        	done
+    	#for-end
+    fi
+
+    #   apt-get -y autoremove
+    #	apt-get -y remove --purge $(deborphan)
+
+	apt-get -y clean   
+	apt-get -y autoclean 
+    
+	return 0    
+}
+
 
 
 
@@ -416,29 +416,37 @@ removePkgAndReport()
     post "processing each record of the definition file"
     
     
-    for type in    "!"  "-"  "+"  "z"  "p"
-        do
+    #   for type in    "!"  "-"  "+"  "z"  "p"
+    #       do
         
-        post; post "processing [ $type ] records"; post
+    #    post; post "processing [ $type ] records"; post
   
-        recNum=0
+    #    recNum=0
     
-        while test "`wc -l $cullDefFile 2> /dev/null | cut -f1 -d' '`" -ge $recNum
-            do
+    #    while test "`wc -l $cullDefFile 2> /dev/null | cut -f1 -d' '`" -ge $recNum
+ 
+ 
+     
+    cat  $cullDefFile  | while read rec 
+    
+        do
      
             set -x
         
-            recNum=`expr $recNum + 1` 
+            #   recNum=`expr $recNum + 1` 
         
-            rec="`head -$recNum $cullDefFile 2> /dev/null | tail -1`"
+            #   rec="`head -$recNum $cullDefFile 2> /dev/null | tail -1`"
      
             action=`echo "$rec"   | cut -f1 -d':'`    
             pkg=`echo "$rec"      | cut -f2 -d':'`
-
             
-            if ! test "$action" = "$type"; then
+            if test "$action" = ""; then
                 continue
-            fi
+            fi            
+            
+            #   if ! test "$action" = "$type"; then
+            #       continue
+            #   fi
         
             post "\ncurrent free space = [ `usedRootBytes` ]\n"   
         
@@ -455,7 +463,7 @@ removePkgAndReport()
 
             cleanupAptEnv          
         
-            done
+            #done
         #while-end
         
         done
