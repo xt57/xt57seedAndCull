@@ -449,6 +449,7 @@ removePkgAndReport()
                 +)  installPkgAndReport     $pkg;;
                 -)  removePkgAndReport      $pkg;;                
                 p)  printPkgInfoAndReport   $pkg;;
+                q)  exit 144                    ;;               
                 *)  ;;
             esac
 
