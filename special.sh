@@ -367,7 +367,7 @@ cleanupAptEnv()
 #   begin    ===========================================
 
 
-    log="/tmp/special.log"
+    logFile="/tmp/special.log"
 
     timeStampTheLog
 
@@ -380,15 +380,37 @@ cleanupAptEnv()
  
     #   preOpCleanAndShrink
 
-    post "processing each record of the definition file"
+
+	export pkg=korganizer
+
+
+    post "\used space before xyz removal = [ `usedRootBytes` ]\n"   
+
+    #	removePkgAndReport  korganizer
     
+	allowForDebugging
 
-    post "\used space before firefox removal = [ `usedRootBytes` ]\n"   
+    if ! pkgIsInstalled $pkg > /dev/null 2>&1; then
+        post "SKIPPING <$pkg> ... not currently installed"
+        return 0
+    fi
 
-    removePkgAndReport  firefox
+    post "\nCULLing <$pkg>\n\n"
 
-    post "\used space before firefox removal = [ `usedRootBytes` ]\n"   
+    post "logFile = [ $logFile ]"
 
+    options="Aptitude::Delete-Unused=1"
+    echo "aa" | aptitude -y -o$options remove $pkg  2>&1 | tee -a $logFile
+
+    #   apt-get -y remove $pkg
+
+    if test $? -gt 0; then
+        post "\n<$pkg> removal FAILED\n\n"
+    else
+        post "\n<$pkg> REMOVED\n\n"
+    fi
+
+    post "\used space after xyz removal = [ `usedRootBytes` ]\n"   
 
 
 
