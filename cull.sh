@@ -187,7 +187,7 @@ preOpCleanAndShrink()
 
     post "preCleanAndShrink() function is active ..."
 
-    post "initial free space = [ `usedRootBytes` ]"
+    post "initial used space = [ `usedRootBytes` ]"
 
     cleanupAptEnv    
  
@@ -225,7 +225,7 @@ postOpCleanAndShrink()
 
     post "postCleanAndShrink() function is active ..."
 
-    post "initial free space = [ `usedRootBytes` ]"
+    post "initial used space = [ `usedRootBytes` ]"
 
     cleanupAptEnv          
 
@@ -326,7 +326,7 @@ removePkgAndReport()
         post "\n<$pkg> REMOVED\n\n"
     fi   
     
-    post "post-removal free space = [ `usedRootBytes` ]"    
+    post "post-removal used space = [ `usedRootBytes` ]"    
     
   	return 0    
 }
@@ -449,7 +449,7 @@ cleanupAptEnv()
             #       continue
             #   fi
         
-            post "\ncurrent free space = [ `usedRootBytes` ]\n"   
+            post "\ncurrent used space = [ `usedRootBytes` ]\n"   
         
             post "processing [ $rec ]"
             
@@ -459,7 +459,8 @@ cleanupAptEnv()
                 -)  removePkgAndReport      $pkg;;                
                 p)  printPkgInfoAndReport   $pkg;;
                 q)  exit 144                    ;;               
-                *)  ;;
+                h)  ;;
+                *)  ;;               
             esac
 
             cleanupAptEnv          
