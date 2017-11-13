@@ -381,12 +381,20 @@ cleanupAptEnv()
     #   preOpCleanAndShrink
 
 
-	export pkg=korganizer
+
+
+
+
+
+
+
+
+
+	export pkg=radeontool
 
 
     post "\used space before xyz removal = [ `usedRootBytes` ]\n"   
 
-    #	removePkgAndReport  korganizer
     
 	allowForDebugging
 
