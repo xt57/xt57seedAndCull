@@ -14,7 +14,7 @@ logFile="/tmp/cull.log"
 cullDefFile="./cull-lubuntu.cfg"
 cullDefFile="./cull-mint-xfce.cfg"
 cullDefFile="./cull-mint-kde.cfg"
-cullDefFile="./cull-neon.cfg"
+cullDefFile="./cull-ubu-kde.cfg"
 bWeAreDebugging=yes
 
 
@@ -52,7 +52,7 @@ addToLog()
 	return 0
 }
 
-postToLogOnly()
+postToLogOnly()espeak-data
 {
 	printf "$1\n"                   >>	$log	2>&1
 	return 0
