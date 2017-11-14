@@ -52,7 +52,7 @@ addToLog()
 	return 0
 }
 
-postToLogOnly()espeak-data
+postToLogOnly()
 {
 	printf "$1\n"                   >>	$log	2>&1
 	return 0
