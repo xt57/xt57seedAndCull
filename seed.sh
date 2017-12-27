@@ -831,13 +831,19 @@ addVirtualBox()
 	groupadd vboxsf		        2>&1 | tee -a $LogFile	
 
 	addCoreAccounts
-	for acct in xt57 ag20253 iansblues kim
+	acct=""
+	while [ "$acct" != "quit" ]
 		do
-        usermod -a -G vboxusers $acct	2>&1	| tee -a	$LogFile
-        usermod -a -G vboxsf    $acct	2>&1	| tee -a	$LogFile
-        post "<$acct> now a member of virtualbox groups"		
-	done
-	    
+		echo "\nEnter an account for VirtualBox integration : \c"
+		read acct
+		if [ "$acct" != "quit" ]; then
+        		usermod -a -G vboxusers $acct	2>&1	| tee -a	$LogFile
+        		usermod -a -G vboxsf    $acct	2>&1	| tee -a	$LogFile
+        		post "<$acct> now a member of virtualbox groups"		
+		done
+	#whend 
+	echo "\n"
+    
     msg="VirtualBox now fully supported, if no errors were reported <return>"
     post "$msg"; read x
     
