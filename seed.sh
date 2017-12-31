@@ -776,6 +776,46 @@ cleanAndShrink()
 
 
 
+ensureVbCitizen()
+{
+    allowForDebugging
+
+    sessionCore=guestAdditionsCiureVirtualBoxCitizenship
+
+        
+    post "setting-up VirtualBox Citizenship"
+
+    addTimeToLog    
+
+    if ! bWeAreVirtualized; then
+    	post "this is not a VirtualBox environment, skipping logic <return>"
+    	return 0
+    fi
+
+    post; post
+
+	post "updating vbox group memberships ..."
+	groupadd vboxusers	        2>&1 | tee -a $LogFile	
+	groupadd vboxsf		        2>&1 | tee -a $LogFile	
+
+	addCoreAccounts
+
+	echo "\nEnter an account for VirtualBox integration : \c"
+	while read acct && [ "$acct" != quit ]; do
+       		usermod -a -G vboxusers "$acct"	2>&1	| tee -a	$LogFile
+       		usermod -a -G vboxsf    "$acct"	2>&1	| tee -a	$LogFile
+       		post "<$acct> now a member of virtualbox groups"		
+	done
+	#whend 
+	echo "\n"
+    
+    msg="If no errors were reported <return>"
+    post "$msg"; read x
+    
+    return 0
+}
+
+
 
 
 
@@ -825,24 +865,7 @@ addVirtualBox()
     
     echo y | bash $gaDir/*.run  2>&1 | tee -a $LogFile
     
-
-	post "updating vbox group memberships ..."
-	groupadd vboxusers	        2>&1 | tee -a $LogFile	
-	groupadd vboxsf		        2>&1 | tee -a $LogFile	
-
-	addCoreAccounts
-	acct=""
-	while [ "$acct" != "quit" ]
-		do
-		echo "\nEnter an account for VirtualBox integration : \c"
-		read acct
-		if [ "$acct" != "quit" ]; then
-        		usermod -a -G vboxusers $acct	2>&1	| tee -a	$LogFile
-        		usermod -a -G vboxsf    $acct	2>&1	| tee -a	$LogFile
-        		post "<$acct> now a member of virtualbox groups"		
-		done
-	#whend 
-	echo "\n"
+	ensureVirtualBoxCitizenship
     
     msg="VirtualBox now fully supported, if no errors were reported <return>"
     post "$msg"; read x
@@ -1261,7 +1284,7 @@ addCoreAccounts()
         post "setting up $sessionCore [$sessionDesc] support ..."
         postTime
 
-	for acct in xt57 di07zd4 iansblues kim
+	for acct in xt57 ag20253 kim
 		do
 		if id $acct > /dev/null 2>&1; then
 			continue
@@ -1369,6 +1392,7 @@ sambaStartingPoint()
                 "installAptitude"	\
                 "addCoreAccounts"   \
                 "addVirtualBox"	    \
+                "ensureVbCitizen"	    \
                 "cleanAndShrink"    \
                 "listPackages"      \
 				"miscTests"		    \
