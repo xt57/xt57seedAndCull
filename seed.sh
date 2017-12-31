@@ -775,6 +775,31 @@ cleanAndShrink()
 
 
 
+ensureGitGlobals()
+{
+    allowForDebugging
+
+    sessionCore=ensureGitGlobals
+
+        
+    post "setting-up $ensureGitGlobals"
+
+    addTimeToLog    
+
+	git config --global user.name "Michael Wiliams"
+	git config --global user.email "mWill@gmail.com"
+
+    msg="<default> Git globals set <return>"
+    post "$msg"; read x
+
+    return 0
+}
+
+
+
+
+
+
 
 ensureVbCitizen()
 {
@@ -1393,6 +1418,7 @@ sambaStartingPoint()
                 "addCoreAccounts"   \
                 "addVirtualBox"	    \
                 "ensureVbCitizen"	    \
+                "ensureGitGlobals"	    \
                 "cleanAndShrink"    \
                 "listPackages"      \
 				"miscTests"		    \
