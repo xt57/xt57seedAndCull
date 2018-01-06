@@ -8,7 +8,7 @@
 
 	var="$(date +%s)"
 
-    bWeAreDebugging=no
+    bWeAreDebugging=yes
 
 
 	LogFile=/var/log/seed.log
@@ -364,8 +364,6 @@ truncateCertainMubuFiles()
 {
 	allowForDebugging
 	
-	set -x
-
     post "truncateCertainMubuFiles() function is active ..."
 
     if [ $extDistro != "mubu" ]; then
@@ -398,8 +396,6 @@ truncateCertainMubuFiles()
 seed()
 {
 	allowForDebugging
-
-    set -x
 
 	post "setting up new system [$distro] ..."
 	post "extended distro title [$extDistro] ..."
@@ -908,13 +904,13 @@ JDK7()
     Post "setting up $sessionCore support ..."
     addTimeToLog
         
-    targetVersion="1.7."
+    targetVersion="1.8."
 
 
     apt-get purge openjdk-\*    > /dev/null 2>&1    # purge openjdks
 
 
-    javac -version 2>&1 | grep '1\.7\.' /dev/null 2>&1
+    javac -version 2>&1 | grep '1\.8\.' /dev/null 2>&1
     if [ $? -eq 0 ]; then
         post "JDK $targetVersion already installed - exit 245"
         javac -version   2>&1   | tee -a $LogFile
@@ -950,13 +946,13 @@ JDK7()
     fi
                
     post "actual JDK install will now launch"
-    if ! apt-get -y install oracle-java7-installer; then
+    if ! apt-get -y install oracle-java8-installer; then
         post "JDK install failed - exit=$?"; read x
         return 213
     fi
  
         post "JDK defaults will now be updated"
-    if ! apt-get -y install oracle-java7-set-default; then
+    if ! apt-get -y install oracle-java8-set-default; then
         post "JDK 7 defaults processing failed - exit 214"; read x
         return 214
     fi
@@ -978,6 +974,9 @@ JDK7()
 
     apt-get -y remove openjdk-7-jre:amd64               > /dev/null 2>&1
     apt-get -y remove openjdk-7-jre-headless:amd64      > /dev/null 2>&1
+
+    apt-get -y remove openjdk-8-jre:amd64               > /dev/null 2>&1
+    apt-get -y remove openjdk-8-jre-headless:amd64      > /dev/null 2>&1
 
     # remove all of the orphaned pkgs
     for x in 1 2 3
@@ -1004,6 +1003,8 @@ JDK8()
 
     allowForDebugging
 
+set +-
+
     sessionCore=JDK
 
     Post "setting up $sessionCore support ..."
@@ -1012,7 +1013,7 @@ JDK8()
     targetVersion="1.8."
 
 
-    apt-get purge openjdk-\*    > /dev/null 2>&1    # purge openjdks
+    #	apt-get purge openjdk-\*    > /dev/null 2>&1    # purge openjdks
 
 
     javac -version 2>&1 | grep '1\.8\.' /dev/null 2>&1
@@ -1079,6 +1080,9 @@ JDK8()
 
     apt-get -y remove openjdk-8-jre:amd64               > /dev/null 2>&1
     apt-get -y remove openjdk-8-jre-headless:amd64      > /dev/null 2>&1
+
+    apt-get -y remove openjdk-7-jre:amd64               > /dev/null 2>&1
+    apt-get -y remove openjdk-7-jre-headless:amd64      > /dev/null 2>&1
 
     # remove all of the orphaned pkgs
     for x in 1 2 3
@@ -1357,6 +1361,12 @@ sambaStartingPoint()
 	post "current distro        : $distro"
 	post "extended distro       : $extDistro"
 	post
+
+
+
+	#	this is a placeholder just to ensure that aptitude it loaded, if needed
+        pkgInstalled git		> /dev/null	2>&1 
+
 
 	if [ "$1" = "netsetup" ]; then
 		addToLog "running netsetup function, before main logic ..."
