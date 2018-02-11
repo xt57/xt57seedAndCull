@@ -1,0 +1,10 @@
+
+misc notes 
+
+
+git clone https://github.com/xt57/xt57seedAndCull.git
+
+
+
+
+
