@@ -91,6 +91,13 @@
 	    extDistro=mubu
 	fi
 
+    	if [ "$extDistro" = "mubu" ]; then
+		release=`lsb_release  -r 2> /dev/null | cut -f2 | cut -f1 -d'.'`
+		if [ "$release" -gt 15 ]; then
+            		#	post "INFO : mubu release higher than 15"
+			:
+		fi
+    	fi
 		    
 	if [ "$extDistro" = mubu ] || [ "$extDistro" = debian ]; then
 		UPDATE="            apt-get -yuq update"
@@ -98,6 +105,17 @@
 		UPGRADE="echo I\n | apt-get -yuq upgrade"
 		INSTALL="           apt-get -yuq install"
 		REMOVE="            apt-get -yuq remove"
+		DE=none
+	fi
+
+	if [ "$extDistro" = mubu ] && [ "$release" -gt 15 ]; then
+		UPDATE="            apt -yuq update"
+		DISTUPDATE="        apt -yuq upgrade"
+		UPGRADE="echo I\n | apt -yuq upgrade"
+		INSTALL="           apt -yuq install"
+		REMOVE="            apt -yuq remove"
+		CLEAN="             apt -yuq clean"
+		PURGE="             apt -yuq purge"
 		DE=none
 	fi
 
@@ -112,6 +130,7 @@
 		INSTALL="           yum -y install"
 		REMOVE="            yum -y remove"
 	fi
+
 
 
 
@@ -215,6 +234,8 @@ pkgInstalled()
 {
 	allowForDebugging
 
+	set -x
+
 	if [ -z "$1" ]; then
 		post "usage : pkgInstalled  pkgName [pkgName arg is required] - exit=9"
 		exit 9
@@ -228,7 +249,7 @@ pkgInstalled()
     pkg="$1"
 
     if ! dpkg -l aptitude 2>&1 | tail -1 | grep "^ii " > /dev/null 2>&1; then      
-        if ! apt-get -y install aptitude > /dev/null 2>&1; then
+        if !  $INSTALL aptitude > /dev/null 2>&1; then
             post "INFO : aptitude install failed, but is required ... exit=9"
             exit 9
         fi
@@ -380,7 +401,7 @@ truncateCertainMubuFiles()
         done
     #for
 
-    apt-get -y clean
+    $CLEAN
 
     post "resulting used space = `usedRootBytes`"
     
@@ -895,7 +916,7 @@ addVirtualBox()
 }
 
 
-JDK7()
+JDK8()
 {
     allowForDebugging
 
@@ -905,116 +926,20 @@ JDK7()
     addTimeToLog
         
     targetVersion="1.8."
-
-
-    apt-get purge openjdk-\*    > /dev/null 2>&1    # purge openjdks
-
-
-    javac -version 2>&1 | grep '1\.8\.' /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        post "JDK $targetVersion already installed - exit 245"
-        javac -version   2>&1   | tee -a $LogFile
-        read x
-        return 245
-    fi
-
-    javac -version 2>&1 | grep -i openjdk /dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        post "openjdk is still installed - we require oracles java - exit 249"
-        javac -version   2>&1   | tee -a $LogFile
-        read x
-        return 245
-    fi
 
     if [ $extDistro != "mubu" ]; then
         post "Linux distro is not ubuntu; JDK withheld - exit 246"
         read x       
         return 246
     fi
-
-    if ! grep -i webupd /etc/apt/sources.list > /dev/null 2>&1; then
-        post "the PPA will now install" 
-        if ! add-apt-repository ppa:webupd8team/java; then
-            return 21
-        fi
-    fi
-        
-    post "apt system will now be updated"
-    if ! apt-get -y update; then
-        post "apt update failed - exit=$?"; read x
-        return 213
-    fi
-               
-    post "actual JDK install will now launch"
-    if ! apt-get -y install oracle-java8-installer; then
-        post "JDK install failed - exit=$?"; read x
-        return 213
-    fi
- 
-        post "JDK defaults will now be updated"
-    if ! apt-get -y install oracle-java8-set-default; then
-        post "JDK 7 defaults processing failed - exit 214"; read x
-        return 214
-    fi
-    
-    post "apt system will now be updated, following java defaults setup"
-    if ! apt-get -y update; then
-        post "apt update failed - exit=$?"; read x
-        return 213
-    fi
- 
-    post "java runtime version check"
-    java -version 2>&1                                              | tee -a        $LogFile
-
-    post "java compiler version check"
-    javac -version 2>&1                                             | tee -a        $LogFile
-
-
-    #  this following code needs to become more effective and portable
-
-    apt-get -y remove openjdk-7-jre:amd64               > /dev/null 2>&1
-    apt-get -y remove openjdk-7-jre-headless:amd64      > /dev/null 2>&1
-
-    apt-get -y remove openjdk-8-jre:amd64               > /dev/null 2>&1
-    apt-get -y remove openjdk-8-jre-headless:amd64      > /dev/null 2>&1
-
-    # remove all of the orphaned pkgs
-    for x in 1 2 3
-        do
-        #   apt-get -y remove $(deborphan)      > /dev/null 2>&1
-        
-        options="Aptitude::Delete-Unused=1"
-        echo "aa" | aptitude -y -o$options remove $(deborphan) 2>&1 | tee -a $logFile       
-                
-        sleep 1
-        done
-    #for-end
-
-    bleachbit --list | grep log | xargs sudo bleachbit --clean
-    bleachbit --list | grep apt | xargs sudo bleachbit --clean
-
-    return 0
-}
-
-
-
-JDK8()
-{
-
-    allowForDebugging
-
-set +-
-
-    sessionCore=JDK
-
-    Post "setting up $sessionCore support ..."
-    addTimeToLog
-        
-    targetVersion="1.8."
-
 
     #	apt-get purge openjdk-\*    > /dev/null 2>&1    # purge openjdks
 
+    $REMOVE openjdk-8-jre:amd64               > /dev/null 2>&1
+    $REMOVE openjdk-8-jre-headless:amd64      > /dev/null 2>&1
+
+    $REMOVE openjdk-7-jre:amd64               > /dev/null 2>&1
+    $REMOVE openjdk-7-jre-headless:amd64      > /dev/null 2>&1
 
     javac -version 2>&1 | grep '1\.8\.' /dev/null 2>&1
     if [ $? -eq 0 ]; then
@@ -1032,42 +957,89 @@ set +-
         return 245
     fi
 
-    if [ $extDistro != "mubu" ]; then
-        post "Linux distro is not ubuntu; JDK withheld - exit 246"
-        read x       
-        return 246
-    fi
 
     if ! grep -i webupd /etc/apt/sources.list > /dev/null 2>&1; then
         post "the PPA will now install" 
-        if ! add-apt-repository ppa:webupd8team/java; then
-            return 21
-        fi
+        #	if ! add-apt-repository ppa:webupd8team/java; then
+        #	post "apt ppa update for java 8 failed - exit=$?"
+        #   	return 21
+        #	fi
     fi
         
     post "apt system will now be updated"
-    if ! apt-get -y update; then
+    if ! $UPDATE ; then
         post "apt update failed - exit=$?"; read x
         return 213
     fi
                
-    post "actual JDK install will now launch"
-    if ! apt-get -y install oracle-java8-installer; then
-        post "JDK install failed - exit=$?"; read x
-        return 213
-    fi
- 
-        post "JDK defaults will now be updated"
-    if ! apt-get -y install oracle-java8-set-default; then
-        post "JDK 8 defaults processing failed - exit 214"; read x
-        return 214
-    fi
+    post "JDK defaults will now be updated"
+    #	if ! $INSTALL  oracle-java8-set-default; then
+    #	post "JDK 8 defaults processing failed - exit 214"; read x
+	#	 return 214
+    #	fi
     
     post "apt system will now be updated, following java defaults setup"
-    if ! apt-get -y update; then
+    if ! $UPDATE ; then
         post "apt update failed - exit=$?"; read x
         return 213
     fi
+
+
+
+	#//	=====================================================================================
+
+	origDir="`pwd`"
+	cd ~
+	pwd
+	
+	if "`pwd`" != "$HOME"; then
+        	echo "not home"
+        	exit 9
+	fi
+	
+        rm -rf  jdk.d
+
+        mkdir   jdktmp.d
+        rm -rf  jdktmp.d/*
+        cd      jdktmp.d
+        pwd
+
+	BASE_URL_8=http://download.oracle.com/otn-pub/java/jdk/8u161-b12/2f38c3b165be4555a1fa6e98c45e0808/jdk-8u161
+	
+	JDK_VERSION=`echo $BASE_URL_8 | rev | cut -d "/" -f1 | rev`
+	
+	declare -a PLATFORMS=("-linux-x64.tar.gz")
+	
+	for platform in "${PLATFORMS[@]}"
+	do
+    		wget -c --header "Cookie: oraclelicense=accept-securebackup-cookie" "${BASE_URL_8}${platform}"
+	done
+	
+	tar xvfz *.gz
+	ls -ltr
+	
+	rm *.gz
+	mv * ../jdk.d
+	
+	cd ..
+	
+        chown ag20253   jdk.d
+        chgrp staff     jdk.d
+
+        rm -rf  jdktmp.d
+
+	ls -ltr
+	pwd
+	
+	echo export JAVA_HOME=~/jdk.d                   >>      /etc/profile
+	JAVA_HOME=~/jdk.d
+	echo export PATH="$PATH:$JAVA_HOME/bin"         >>      /etc/profile
+	
+	cd $origDir
+	pwd
+
+	#//	=====================================================================================
+
  
     post "java runtime version check"
     java -version 2>&1                                              | tee -a        $LogFile
@@ -1075,53 +1047,9 @@ set +-
     post "java compiler version check"
     javac -version 2>&1                                             | tee -a        $LogFile
 
-
-    #  this following code needs to become more effective and portable
-
-    apt-get -y remove openjdk-8-jre:amd64               > /dev/null 2>&1
-    apt-get -y remove openjdk-8-jre-headless:amd64      > /dev/null 2>&1
-
-    apt-get -y remove openjdk-7-jre:amd64               > /dev/null 2>&1
-    apt-get -y remove openjdk-7-jre-headless:amd64      > /dev/null 2>&1
-
-    # remove all of the orphaned pkgs
-    for x in 1 2 3
-        do
-        #   apt-get -y remove $(deborphan)      > /dev/null 2>&1
-        
-        options="Aptitude::Delete-Unused=1"
-        echo "aa" | aptitude -y -o$options remove $(deborphan) 2>&1 | tee -a $logFile       
-                
-        sleep 1
-        done
-    #for-end
-
-    bleachbit --list | grep log | xargs sudo bleachbit --clean
-    bleachbit --list | grep apt | xargs sudo bleachbit --clean
-
     return 0
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     #   the following code can be removed, once we are comfortable with the code above
-
 
     exit 9
 
@@ -1156,25 +1084,25 @@ set +-
     fi
         
     post "apt system will now be updated"
-    if ! apt-get -y update; then
+    if ! $UPDATE ; then
         post "apt update failed - exit=$?"; read x
         return 213
     fi
                
     post "actual JDK install will now launch"
-    if ! apt-get -y install oracle-java8-installer; then
+    if ! $INSTALL oracle-java8-installer; then
         post "JDK install failed - exit=$?"; read x
         return 213
     fi
         
     post "JDK defaults will now be updated"
-    if ! apt-get -y install oracle-java8-set-default; then
+    if ! INSTALL  oracle-java8-set-default; then
         post "JDK env post failed - exit 214"; read x
         return 214
     fi
     
     post "apt system will now be updated, following java defaults setup"
-    if ! apt-get -y update; then
+    if ! $UPDATE ; then
         post "apt update failed - exit=$?"; read x
         return 213
     fi
@@ -1209,7 +1137,6 @@ quit()
     post "exiting ..."
 	exit 0
 }
-int-xfce
 
 
 cull()
@@ -1294,7 +1221,7 @@ installAptitude()
 
     post "installing aptitude ..."
 
-    if ! apt-get -y install aptitude 2>&1; then
+    if ! $INSTALL aptitude 2>&1; then
         post "could not install aptitude - exit 242"
         exit 242
     fi
@@ -1389,6 +1316,8 @@ sambaStartingPoint()
 		setupNmNetwork $1
 		exit 0
 	fi
+
+	post "INFO : mubu release higher than 15"
 
     post "================================="
     post "                                 "
