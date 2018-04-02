@@ -11,10 +11,10 @@
 #   set initial values              =========================================
 
 logFile="/tmp/cull.log"
-cullDefFile="./cull-lubuntu.cfg"
 cullDefFile="./cull-mint-xfce.cfg"
 cullDefFile="./cull-mint-kde.cfg"
 cullDefFile="./cull-ubu-kde.cfg"
+cullDefFile="./cull-lubuntu.cfg"
 bWeAreDebugging=yes
 
 
@@ -478,6 +478,6 @@ cleanupAptEnv()
         done
     #for-end
  
-    post "cull session completed <return>"; read x
+    post "cull session completed <return>"
  
     exit 0
