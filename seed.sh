@@ -53,10 +53,12 @@
 
 	if grep -i mint /etc/issue > /dev/null	2>&1; then
 		distro=mint
+		extDistro=ubuntu		
 	fi
 
 	if grep -i solyd /etc/issue > /dev/null	2>&1; then
 		distro=solyd
+		extDistro=ubuntu		
 	fi
 
 	if grep -i centos /etc/centos-release	> /dev/null 2>&1; then
@@ -69,15 +71,22 @@
 
 	if grep -i ubuntu /etc/issue > /dev/null 2>&1; then
 		distro=ubuntu
+		extDistro=ubuntu		
 	fi
 
 	if ps -ef | grep -i session | grep -i lubuntu > /dev/null 2>&1; then
 		distro=lubuntu
+		extDistro=ubuntu		
 	fi
 
 	if grep -i lmde /etc/issue > /dev/null	2>&1; then
 		distro=lmde
 		extDistro=debian
+	fi
+
+	if grep -i neon /etc/issue > /dev/null	2>&1; then
+		distro=neon
+		extDistro=ubuntu
 	fi
 
 
@@ -91,15 +100,11 @@
 	    extDistro=mubu
 	fi
 
-    	if [ "$extDistro" = "mubu" ]; then
+    if [ "$extDistro" = "ubuntu" ]; then
 		release=`lsb_release  -r 2> /dev/null | cut -f2 | cut -f1 -d'.'`
-		if [ "$release" -gt 15 ]; then
-            		#	post "INFO : mubu release higher than 15"
-			:
-		fi
-    	fi
+    fi
 		    
-	if [ "$extDistro" = mubu ] || [ "$extDistro" = debian ]; then
+	if [ "$extDistro" = ubuntu ] || [ "$extDistro" = debian ]; then
 		UPDATE="            apt-get -yuq update"
 		DISTUPDATE="        apt-get -yuq upgrade"
 		UPGRADE="echo I\n | apt-get -yuq upgrade"
@@ -108,7 +113,7 @@
 		DE=none
 	fi
 
-	if [ "$extDistro" = mubu ] && [ "$release" -gt 15 ]; then
+	if [ "$extDistro" = ubuntu ] && [ "$release" -gt 15 ]; then
 		UPDATE="            apt -yuq update"
 		DISTUPDATE="        apt -yuq upgrade"
 		UPGRADE="echo I\n | apt -yuq upgrade"
@@ -822,7 +827,7 @@ ensureVbCitizen()
 {
     allowForDebugging
 
-    sessionCore=guestAdditionsCiureVirtualBoxCitizenship
+    sessionCore=guestAdditionsEnsureVirtualBoxCitizenship
 
         
     post "setting-up VirtualBox Citizenship"
@@ -840,10 +845,10 @@ ensureVbCitizen()
 	groupadd vboxusers	        2>&1 | tee -a $LogFile	
 	groupadd vboxsf		        2>&1 | tee -a $LogFile	
 
-	addCoreAccounts
+	#	addCoreAccounts
 
 	echo "\nEnter an account for VirtualBox integration : \c"
-	while read acct && [ "$acct" != quit ]; do
+	echo "ag20253" | while read acct; do
        		usermod -a -G vboxusers "$acct"	2>&1	| tee -a	$LogFile
        		usermod -a -G vboxsf    "$acct"	2>&1	| tee -a	$LogFile
        		post "<$acct> now a member of virtualbox groups"		
@@ -1317,7 +1322,7 @@ sambaStartingPoint()
 		exit 0
 	fi
 
-	post "INFO : mubu release higher than 15"
+	#	post "INFO : mubu release higher than 15"
 
     post "================================="
     post "                                 "
@@ -1356,8 +1361,8 @@ sambaStartingPoint()
                 "installAptitude"	\
                 "addCoreAccounts"   \
                 "addVirtualBox"	    \
-                "ensureVbCitizen"	    \
-                "ensureGitGlobals"	    \
+                "ensureVbCitizen"	\
+                "ensureGitGlobals"	\
                 "cleanAndShrink"    \
                 "listPackages"      \
 				"miscTests"		    \
