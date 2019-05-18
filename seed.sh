@@ -56,11 +56,6 @@
 		extDistro=ubuntu		
 	fi
 
-	if grep -i solyd /etc/issue > /dev/null	2>&1; then
-		distro=solyd
-		extDistro=ubuntu		
-	fi
-
 	if grep -i centos /etc/centos-release	> /dev/null 2>&1; then
 		distro=centos
 	fi
@@ -74,16 +69,6 @@
 		extDistro=ubuntu		
 	fi
 
-	if ps -ef | grep -i session | grep -i lubuntu > /dev/null 2>&1; then
-		distro=lubuntu
-		extDistro=ubuntu		
-	fi
-
-	if grep -i lmde /etc/issue > /dev/null	2>&1; then
-		distro=lmde
-		extDistro=debian
-	fi
-
 	if grep -i neon /etc/issue > /dev/null	2>&1; then
 		distro=neon
 		extDistro=ubuntu
@@ -94,11 +79,6 @@
 		exit 99
 	fi
 
-
-	echo "$distro" | egrep -i "mint|ubuntu|solyd" > /dev/null 2>&1
-	if [ $? -eq 0 ]; then
-	    extDistro=mubu
-	fi
 
     if [ "$extDistro" = "ubuntu" ]; then
 		release=`lsb_release  -r 2> /dev/null | cut -f2 | cut -f1 -d'.'`
@@ -246,7 +226,7 @@ pkgInstalled()
 		exit 9
 	fi
 
-	if ! echo "$extDistro" | grep -i "mubu"; then   # if distro not ubuntu, mint, etc.
+	if ! echo "$extDistro" | grep -i "ubuntu"; then   # if distro not ubuntu, mint, etc.
 		post "INFO : add support for non-ubuntu distros ... exit=9"
         exit 9
 	fi
@@ -392,7 +372,7 @@ truncateCertainMubuFiles()
 	
     post "truncateCertainMubuFiles() function is active ..."
 
-    if [ $extDistro != "mubu" ]; then
+    if [ $distro != "mint" ]; then
         return 0
     fi
 
@@ -433,7 +413,7 @@ seed()
 	post "we may need to add debconf-utils to a new mint system, skipping ..."
 
 
-	if [ $extDistro = "mubu" ]; then
+	if [ $extDistro = "ubuntu" ]; then
 	    :
         #   gsettings set org.gnome.desktop.session idle-delay 0	
 
@@ -932,8 +912,8 @@ JDK8()
         
     targetVersion="1.8."
 
-    if [ $extDistro != "mubu" ]; then
-        post "Linux distro is not ubuntu; JDK withheld - exit 246"
+    if [ $extDistro != "ubuntu" ]; then
+        post "Linux distro is not ubuntu-based; JDK withheld - exit 246"
         read x       
         return 246
     fi
@@ -1075,8 +1055,8 @@ JDK8()
         return 245
     fi
 
-    if [ $extDistro != "mubu" ]; then
-        post "Linux distro is not ubuntu; JDK withheld - exit 246"
+    if [ $extDistro != "buntu" ]; then
+        post "Linux distro is not ubuntu-based; JDK withheld - exit 246"
         read x       
         return 246
     fi
