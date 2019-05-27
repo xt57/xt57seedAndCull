@@ -46,8 +46,8 @@
 
 	# prepare for distro differences
 	# ==============================
-	distro="null"
-	extDistro="null"
+	distro=""
+	extDistro=""
 
 
 
@@ -72,6 +72,11 @@
 	if grep -i neon /etc/issue > /dev/null	2>&1; then
 		distro=neon
 		extDistro=ubuntu
+	fi
+
+	if grep -i suse /etc/issue > /dev/null	2>&1; then
+		distro=suse
+		extDistro=suse
 	fi
 
 
@@ -116,6 +121,12 @@
 		REMOVE="            yum -y remove"
 	fi
 
+
+
+	if [ "$distro" = suse ]; then
+		DISTUPDATE="        zypper up"
+		INSTALL="           zypper in"
+	fi
 
 
 
@@ -1277,7 +1288,9 @@ sambaStartingPoint()
 
 
 	#	this is a placeholder just to ensure that aptitude it loaded, if needed
-        pkgInstalled git		> /dev/null	2>&1 
+	if [ "extdistro" = "ubuntu" ]; then
+        	pkgInstalled git		> /dev/null	2>&1 
+	fi
 
 
 	if [ "$1" = "netsetup" ]; then
