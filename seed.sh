@@ -51,6 +51,11 @@
 
 
 
+	if grep -i neon /etc/issue > /dev/null	2>&1; then
+		distro=neon
+		extDistro=ubuntu		
+	fi
+
 	if grep -i mint /etc/issue > /dev/null	2>&1; then
 		distro=mint
 		extDistro=ubuntu		
@@ -1253,6 +1258,61 @@ addCoreAccounts()
 }
 
 
+ensureKdeBuildSetup()
+{
+        allowForDebugging
+
+        sessionCore=kdeBuildSetup
+        sessionDesc="setup the build environment for KDE development"
+
+        post "setting up $sessionCore [$sessionDesc] support ..."
+        postTime
+
+	if ! $INSTALL git cmake dialog 2>&1; then
+		post "could not install aptitude - exit 242"
+		exit 242
+	fi
+
+	post "kde-build packages are present ..."
+	
+	ensureGitGlobals
+
+	configTarget="~/.gitconfig"
+
+	if ! grep -i pushInsteadOf $configTarget 2>&1; then
+		echo "[url \"https://anongit.kde.org/\"]"       >>	$configTarget
+		echo "\tinsteadOf = kde:"      			>>	$configTarget
+		echo "[url \"git@git.kde.org:\"]"       	>>	$configTarget
+		echo "\tpushInsteadOf = kde:"			>>	$configTarget
+		post "kdesrc-build needs added to gitconfig"
+	fi
+
+
+	if ! test -d "~/kde/src"; then 
+		mkdir -p ~/kde/src
+		cd ~/kde/src/
+		#	git clone kde:kdesrc-build
+		post "kde dev cloned ..."; read x
+	else
+		post "kde/src dirs already present ..."
+	fi
+
+	
+
+	configTarget="~/.bashrc"
+
+        if ! grep "/kde/src/kdesrc-build" $configTarget 2>&1; then
+                echo "export PATH=~/kde/src/kdesrc-build:\$PATH"	>>      $configTarget
+		post "kdesrc-build added to bashrc"
+        fi
+
+	post "kdesrc-build prep processing completed <return>"; read x
+	postTime
+
+	return 0
+}
+
+
 sambaStartingPoint()
 {
     #   Samba packages
@@ -1267,7 +1327,9 @@ sambaStartingPoint()
 
 
 
+ 
 
+ 
 
 
 #	begin execution here
@@ -1345,24 +1407,25 @@ sambaStartingPoint()
 
 		PS3="Option : "
 		options=(                   \
-		    	"quit"	    	    \
-				"draw"		        \
-                "cull"	            \
-				"seed"		        \
-				"JDK7"		        \
-				"JDK8"		        \
-                "installAptitude"	\
-                "addCoreAccounts"   \
-                "addVirtualBox"	    \
-                "ensureVbCitizen"	\
-                "ensureGitGlobals"	\
-                "cleanAndShrink"    \
-                "listPackages"      \
-				"miscTests"		    \
-				"addTimeToLog"	    \
-				"viewLog"		    \
-				"showCullLog"	    \
-				"clearLog"		    \
+			"quit"	    	    \
+			"draw"		        \
+			"cull"	            \
+			"seed"		        \
+			"JDK7"		        \
+			"JDK8"		        \
+			"installAptitude"	\
+			"addCoreAccounts"   \
+			"addVirtualBox"	    \
+			"ensureVbCitizen"	\
+			"ensureGitGlobals"	\
+			"ensureKdeBuild"	\
+			"cleanAndShrink"    \
+			"listPackages"      \
+			"miscTests"		    \
+			"addTimeToLog"	    \
+			"viewLog"		    \
+			"showCullLog"	    \
+			"clearLog"		    \
 			)
 	
 		select opt in "${options[@]}"
