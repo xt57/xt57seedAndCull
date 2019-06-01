@@ -1277,37 +1277,47 @@ ensureKdeBuildSetup()
 	
 	ensureGitGlobals
 
-	configTarget="~/.gitconfig"
+	configTarget="$HOME/.gitconfig"
+
+	if test -f $configTarget; then
+		post "gitconfig exists"
+	else
+		post "gitconfig not found by test"
+	fi
 
 	if ! grep -i pushInsteadOf $configTarget 2>&1; then
+		echo "" 					>>	$configTarget
 		echo "[url \"https://anongit.kde.org/\"]"       >>	$configTarget
-		echo "\tinsteadOf = kde:"      			>>	$configTarget
+		echo "	insteadOf = kde:"      			>>	$configTarget
+		echo "" 					>>	$configTarget
 		echo "[url \"git@git.kde.org:\"]"       	>>	$configTarget
-		echo "\tpushInsteadOf = kde:"			>>	$configTarget
+		echo "	pushInsteadOf = kde:"			>>	$configTarget
 		post "kdesrc-build needs added to gitconfig"
 	fi
 
 
-	if ! test -d "~/kde/src"; then 
-		mkdir -p ~/kde/src
-		cd ~/kde/src/
+	configTarget="$HOME/kde/src"
+
+	if ! test -d "$configTarget"; then 
+		mkdir -p $configTarget
+		cd $configTarget
 		#	git clone kde:kdesrc-build
-		post "kde dev cloned ..."; read x
+		post "kde dev env cloned ..."
 	else
 		post "kde/src dirs already present ..."
 	fi
 
-	
 
-	configTarget="~/.bashrc"
+	configTarget="$HOME/.bashrc"
 
         if ! grep "/kde/src/kdesrc-build" $configTarget 2>&1; then
-                echo "export PATH=~/kde/src/kdesrc-build:\$PATH"	>>      $configTarget
+                echo ""							>>      $configTarget
+                echo "export PATH=\$HOME/kde/src/kdesrc-build:\$PATH"	>>      $configTarget
 		post "kdesrc-build added to bashrc"
         fi
 
-	post "kdesrc-build prep processing completed <return>"; read x
 	postTime
+	post "kdesrc-build prep processing completed <return>"; read x
 
 	return 0
 }
@@ -1414,14 +1424,14 @@ sambaStartingPoint()
 			"JDK7"		        \
 			"JDK8"		        \
 			"installAptitude"	\
-			"addCoreAccounts"   \
-			"addVirtualBox"	    \
+			"addCoreAccounts"	\
+			"addVirtualBox"		\
 			"ensureVbCitizen"	\
 			"ensureGitGlobals"	\
-			"ensureKdeBuild"	\
-			"cleanAndShrink"    \
-			"listPackages"      \
-			"miscTests"		    \
+			"ensureKdeBuildSetup"	\
+			"cleanAndShrink"	\
+			"listPackages"		\
+			"miscTests"		\
 			"addTimeToLog"	    \
 			"viewLog"		    \
 			"showCullLog"	    \
